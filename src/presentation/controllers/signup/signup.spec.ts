@@ -127,7 +127,7 @@ test('Should return 400 if no password confirmation fails', () => {
 })
 
 
-test('Should return 400 if an invalid email is provided', () => {
+test('Should return 55 if an invalid email is provided', () => {
   const { sut, emailValidatorStub } = makeSut()
   jest.spyOn(emailValidatorStub, 'isValid').mockReturnValueOnce(false)
   const httpRequest = {
@@ -173,6 +173,26 @@ test('Should return 500 if EmailValidator throws', () => {
   expect(HttpResponse.statusCode).toBe(500)
   expect(HttpResponse.body).toEqual(new ServerError())
 })
+
+test('Should return 500 if AddAccount throws', () => {
+  const { sut, addAccountStub } = makeSut()
+  jest.spyOn(addAccountStub, 'add').mockImplementationOnce(() => {
+    throw new Error()
+  })
+  const httpRequest = {
+    body: {
+      name: 'any_name',
+      email: 'invalid_email@mail.com',
+      password: 'any_password',
+      passwordConfirmation: 'any_password'
+    }
+  }
+  const HttpResponse = sut.handle(httpRequest)
+  expect(HttpResponse.statusCode).toBe(500)
+  expect(HttpResponse.body).toEqual(new ServerError() )
+})
+
+
 
 test('Should call AddAccount with correct values', () => {
   const { sut, addAccountStub } = makeSut()
